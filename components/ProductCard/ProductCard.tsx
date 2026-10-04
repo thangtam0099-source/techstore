@@ -71,7 +71,11 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <div className="group relative flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-150 hover:border-zinc-400 dark:hover:border-zinc-700">
       {/* Product Image */}
-      <Link href={`/products/${product.slug}`} className="relative aspect-square w-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden block">
+      <Link
+        href={`/products/${product.slug}`}
+        prefetch={true}
+        className="relative aspect-square w-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden block"
+      >
         <Image
           src={imageUrl}
           alt={product.name}
@@ -111,6 +115,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         {/* Title */}
         <Link
           href={`/products/${product.slug}`}
+          prefetch={true}
           className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 leading-snug mb-2"
           title={product.name}
         >

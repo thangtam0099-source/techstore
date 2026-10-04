@@ -55,24 +55,28 @@ export default function Header() {
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-300">
               <Link
                 href="/"
+                prefetch={true}
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
                 Trang chủ
               </Link>
               <Link
                 href="/products"
+                prefetch={true}
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
                 Sản phẩm
               </Link>
               <Link
                 href="/products?category=all"
+                prefetch={true}
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
                 Danh mục
               </Link>
               <Link
                 href="/products?featured=true"
+                prefetch={true}
                 className="hover:text-zinc-900 dark:hover:text-white transition-colors text-amber-600 dark:text-amber-400"
               >
                 Khuyến mãi
@@ -109,6 +113,7 @@ export default function Header() {
             {/* Cart Button */}
             <Link
               href="/cart"
+              prefetch={true}
               className="relative p-2 rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               aria-label="Giỏ hàng"
             >
@@ -153,6 +158,7 @@ export default function Header() {
                     {user.role === "ADMIN" && (
                       <Link
                         href="/admin"
+                        prefetch={true}
                         className="flex items-center gap-2 px-3.5 py-2 text-emerald-600 dark:text-emerald-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 font-medium"
                       >
                         <Shield className="w-4 h-4" />
@@ -162,6 +168,7 @@ export default function Header() {
 
                     <Link
                       href="/profile"
+                      prefetch={true}
                       className="flex items-center gap-2 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
                     >
                       <UserIcon className="w-4 h-4" />
@@ -183,6 +190,7 @@ export default function Header() {
               <div className="hidden sm:flex items-center gap-2 text-sm">
                 <Link
                   href="/login"
+                  prefetch={true}
                   className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   Đăng nhập

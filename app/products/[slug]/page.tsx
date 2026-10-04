@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import prisma from "@/lib/db/prisma";
+import { getProductBySlug, getTopProductSlugs } from "@/lib/db/cached";
 import ProductDetailView from "@/components/ProductDetail/ProductDetailView";
+
+export const revalidate = 120; // Cache product page for 2 minutes
 
 interface ProductPageProps {
   params: {
@@ -12,14 +14,16 @@ interface ProductPageProps {
   };
 }
 
+export async function generateStaticParams() {
+  try {
+    return await getTopProductSlugs();
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    include: {
-      brand: true,
-      images: { take: 1 },
-    },
-  });
+  const product = await getProductBySlug(params.slug);
 
   if (!product) {
     return {
@@ -41,19 +45,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    include: {
-      brand: true,
-      category: true,
-      images: { orderBy: { sortOrder: "asc" } },
-      variants: { orderBy: { price: "asc" } },
-      reviews: {
-        include: { user: { select: { name: true } } },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+  const product = await getProductBySlug(params.slug);
 
   if (!product || product.status === "ARCHIVED") {
     notFound();

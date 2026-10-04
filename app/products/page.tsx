@@ -2,9 +2,14 @@ import React from "react";
 import Link from "next/link";
 import prisma from "@/lib/db/prisma";
 import ProductGrid from "@/components/ProductGrid/ProductGrid";
-import { Filter, SlidersHorizontal, Search, X } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
+import { getCachedCategories, getCachedBrands } from "@/lib/db/cached";
+import {
+  ProductSortSelect,
+  ProductFilterSearchInput,
+} from "@/components/Products/ProductFilterControls";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 interface ProductsPageProps {
   searchParams: {
@@ -98,8 +103,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       },
     }),
     prisma.product.count({ where }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.brand.findMany({ orderBy: { name: "asc" } }),
+    getCachedCategories(),
+    getCachedBrands(),
   ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -153,28 +158,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {/* Sort Controls */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500 whitespace-nowrap">Sắp xếp:</span>
-          <form method="GET" action="/products" className="inline-block">
-            {query && <input type="hidden" name="q" value={query} />}
-            {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
-            {brandSlug && <input type="hidden" name="brand" value={brandSlug} />}
-            {priceRange && <input type="hidden" name="priceRange" value={priceRange} />}
-            {stockOnly && <input type="hidden" name="stock" value="in_stock" />}
-            {isFeatured && <input type="hidden" name="featured" value="true" />}
-            <select
-              name="sort"
-              defaultValue={sortBy}
-              // auto-submit on change
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              onChange="this.form.submit()"
-              className="py-1.5 px-3 rounded-lg text-xs font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="price_asc">Giá: Thấp → Cao</option>
-              <option value="price_desc">Giá: Cao → Thấp</option>
-              <option value="sales">Bán chạy</option>
-            </select>
-          </form>
+          <ProductSortSelect currentSort={sortBy} />
         </div>
       </div>
 
@@ -199,20 +183,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </div>
 
             {/* Keyword Search inside Filter */}
-            <form method="GET" action="/products" className="relative">
-              {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
-              {brandSlug && <input type="hidden" name="brand" value={brandSlug} />}
-              {priceRange && <input type="hidden" name="priceRange" value={priceRange} />}
-              {stockOnly && <input type="hidden" name="stock" value="in_stock" />}
-              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                name="q"
-                defaultValue={query}
-                placeholder="Tìm tên, SKU..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-              />
-            </form>
+            <ProductFilterSearchInput initialQuery={query} />
 
             {/* Category Filter */}
             <div className="space-y-2">

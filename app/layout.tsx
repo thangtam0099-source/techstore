@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Roboto_Flex } from "next/font/google";
 import "./globals.css";
@@ -8,6 +9,7 @@ import { CartProvider } from "@/components/Cart/CartContext";
 import { PurchaseModalProvider } from "@/components/PurchaseModal/PurchaseModalContext";
 import { AuthProvider } from "@/components/Auth/AuthContext";
 import PurchaseModal from "@/components/PurchaseModal/PurchaseModal";
+import NavigationProgress from "@/components/Navigation/NavigationProgress";
 
 const robotoFlex = Roboto_Flex({
   subsets: ["latin", "vietnamese"],
@@ -16,6 +18,7 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tam-store.vercel.app"),
   title: "Tâm Store - Thiết bị công nghệ cho cuộc sống hiện đại",
   description:
     "Cửa hàng thiết bị công nghệ chính hãng Tâm Store. Khám phá điện thoại, laptop, phụ kiện cao cấp và liên hệ đặt mua trực tiếp qua Messenger.",
@@ -35,6 +38,8 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning className={robotoFlex.variable}>
       <head>
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -52,6 +57,9 @@ export default function RootLayout({
         />
       </head>
       <body className="flex flex-col min-h-screen">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <ToastProvider>
           <AuthProvider>
             <CartProvider>

@@ -16,6 +16,7 @@ import {
   Truck,
 } from "lucide-react";
 import prisma from "@/lib/db/prisma";
+import { getCachedCategories } from "@/lib/db/cached";
 import ProductGrid from "@/components/ProductGrid/ProductGrid";
 
 export const revalidate = 60; // ISR cache
@@ -33,14 +34,7 @@ const categoryIconMap: Record<string, React.ReactNode> = {
 
 export default async function HomePage() {
   const [categories, featuredProducts, newProducts] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        _count: {
-          select: { products: true },
-        },
-      },
-    }),
+    getCachedCategories(),
     prisma.product.findMany({
       where: { status: "ACTIVE", isFeatured: true },
       take: 8,
