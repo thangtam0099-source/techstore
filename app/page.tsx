@@ -122,20 +122,6 @@ export default async function HomePage() {
                   sizes="(max-width: 1024px) 100vw, 500px"
                   className="object-cover object-center"
                 />
-                <div className="absolute bottom-3 left-3 right-3 p-3 rounded-lg bg-white/90 dark:bg-zinc-900/90 backdrop-blur border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-zinc-900 dark:text-white">
-                      MacBook Pro M3 &amp; iPhone 16 Pro
-                    </p>
-                    <p className="text-[11px] text-zinc-500">Sẵn hàng - Giá cực tốt khi liên hệ</p>
-                  </div>
-                  <Link
-                    href="/products/macbook-pro-14-m3-pro"
-                    className="text-xs font-medium text-zinc-900 dark:text-white underline hover:no-underline ml-2"
-                  >
-                    Xem →
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
