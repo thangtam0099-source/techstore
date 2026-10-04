@@ -179,6 +179,7 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
               alt={product.name}
               fill
               priority
+              unoptimized={mainImageUrl.startsWith("data:")}
               sizes="(max-width: 1024px) 100vw, 600px"
               className="object-cover object-center"
             />
@@ -214,6 +215,7 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
                     src={img.imageUrl}
                     alt={`Ảnh thumbnail ${idx + 1}`}
                     fill
+                    unoptimized={img.imageUrl.startsWith("data:")}
                     sizes="80px"
                     className="object-cover"
                   />

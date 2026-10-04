@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthContext";
-import { Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
+import { Lock, Mail, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function LoginPage() {
             TS
           </div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Đăng nhập TechStore
+            Đăng nhập Tâm Store
           </h1>
           <p className="text-xs text-zinc-500">
             Đăng nhập để theo dõi đánh giá và quản lý tài khoản
@@ -102,26 +102,6 @@ export default function LoginPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
-
-        {/* Demo Accounts Helper Card */}
-        <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 text-xs space-y-1 text-zinc-500">
-          <p className="font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-            Tài khoản demo sẵn có:
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 font-mono text-[11px]">
-            <div>
-              <span className="font-semibold text-zinc-700 dark:text-zinc-300">Admin:</span>
-              <br />
-              admin@shop.com / admin123
-            </div>
-            <div>
-              <span className="font-semibold text-zinc-700 dark:text-zinc-300">User:</span>
-              <br />
-              user@shop.com / user123
-            </div>
-          </div>
-        </div>
 
         <div className="text-center text-xs text-zinc-500 pt-2 border-t border-zinc-100 dark:border-zinc-800">
           Chưa có tài khoản?{" "}

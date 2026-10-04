@@ -11,8 +11,12 @@ import {
   Save,
   Image as ImageIcon,
   Check,
+  UploadCloud,
+  Loader2,
+  Star,
 } from "lucide-react";
 import { useToast } from "@/components/Toast/ToastContext";
+import { compressImage } from "@/lib/utils/image";
 
 interface BrandOption {
   id: string;
@@ -90,71 +94,126 @@ export default function ProductForm({
   );
   const [description, setDescription] = useState(initialData?.description || "");
 
-  // Image URLs list
-  const [images, setImages] = useState<string[]>(
-    initialData?.images?.map((i) => i.imageUrl) || [
-      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800&auto=format&fit=crop",
-    ]
-  );
-  const [newImageUrl, setNewImageUrl] = useState("");
-
-  // Key-value specifications
-  const parseInitialSpecs = (): Array<{ key: string; value: string }> => {
-    try {
-      if (initialData?.specifications) {
-        const obj = JSON.parse(initialData.specifications);
-        return Object.entries(obj).map(([key, value]) => ({
-          key,
-          value: String(value),
-        }));
-      }
-    } catch {
-      // fallback
-    }
-    return [
-      { key: "Màn hình", value: "" },
-      { key: "Vi xử lý", value: "" },
-      { key: "RAM", value: "" },
-      { key: "Bộ nhớ", value: "" },
-    ];
-  };
-
-  const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>(
-    parseInitialSpecs()
-  );
-
-  // Variants list
-  const [variants, setVariants] = useState<
-    Array<{ name: string; value: string; price: string; stock: string }>
-  >(
-    initialData?.variants?.map((v) => ({
-      name: v.name,
-      value: v.value,
-      price: v.price ? String(v.price) : "",
-      stock: String(v.stock),
-    })) || []
-  );
-
-  // Auto-generate slug from name if empty
   const handleNameChange = (val: string) => {
     setName(val);
     if (!isEdit && !slug) {
-      const generated = val
+      const generatedSlug = val
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)+/g, "");
-      setSlug(generated);
+        .replace(/^-+|-+$/g, "");
+      setSlug(generatedSlug);
     }
   };
 
-  // Add Image
-  const handleAddImage = () => {
-    if (newImageUrl.trim()) {
-      setImages([...images, newImageUrl.trim()]);
-      setNewImageUrl("");
+  // Specifications
+  const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>(() => {
+    if (initialData?.specifications) {
+      try {
+        const parsed = JSON.parse(initialData.specifications);
+        if (typeof parsed === "object" && parsed !== null) {
+          return Object.entries(parsed).map(([key, value]) => ({
+            key,
+            value: String(value),
+          }));
+        }
+      } catch (_) {}
     }
+    return [
+      { key: "Thương hiệu", value: "" },
+      { key: "Bảo hành", value: "12 tháng" },
+    ];
+  });
+
+  // Variants
+  const [variants, setVariants] = useState<
+    Array<{ name: string; value: string; price: string; stock: string }>
+  >(() => {
+    if (initialData?.variants && initialData.variants.length > 0) {
+      return initialData.variants.map((v) => ({
+        name: v.name,
+        value: v.value,
+        price: v.price ? String(v.price) : "",
+        stock: String(v.stock),
+      }));
+    }
+    return [];
+  });
+
+  // Images list
+  const [images, setImages] = useState<string[]>(
+    initialData?.images?.map((i) => i.imageUrl) || []
+  );
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Upload and compress local files
+  const handleUploadFiles = async (fileList: FileList | File[]) => {
+    const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    if (files.length === 0) {
+      showToast("Vui lòng chọn file hình ảnh (JPG, PNG, WEBP).", "error");
+      return;
+    }
+
+    setUploadingImages(true);
+    try {
+      // 1. Tự động nén ảnh sang định dạng WebP trực tiếp trên trình duyệt
+      const compressedImages: string[] = [];
+      for (const file of files) {
+        const compressedBase64 = await compressImage(file, 1200, 1200, 0.85);
+        compressedImages.push(compressedBase64);
+      }
+
+      // 2. Gửi lên API upload
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: compressedImages }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.urls) {
+        setImages((prev) => [...prev, ...data.urls]);
+        showToast(`✓ Đã thêm ${data.urls.length} ảnh trực tiếp từ máy tính!`);
+      } else {
+        // Fallback: nếu API có vấn đề, lưu trực tiếp base64 đã nén siêu nhẹ
+        setImages((prev) => [...prev, ...compressedImages]);
+        showToast(`✓ Đã thêm ${compressedImages.length} ảnh từ máy tính!`);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi xử lý ảnh tải lên.", "error");
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleUploadFiles(e.target.files);
+      e.target.value = ""; // reset input
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleUploadFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleSetPrimary = (index: number) => {
+    if (index === 0) return;
+    setImages((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(index, 1);
+      next.unshift(item);
+      return next;
+    });
+    showToast("✓ Đã chọn làm ảnh đại diện chính của sản phẩm!");
   };
 
   const handleRemoveImage = (index: number) => {
@@ -376,56 +435,132 @@ export default function ProductForm({
           <div className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-3 flex items-center justify-between">
               <span>Hình ảnh sản phẩm ({images.length})</span>
+              <span className="text-[11px] text-zinc-500 font-normal">
+                Ảnh đầu tiên là ảnh đại diện chính
+              </span>
             </h2>
 
-            <div className="space-y-3 text-xs">
-              <div className="flex gap-2">
+            <div className="space-y-4 text-xs">
+              {/* Direct File Dropzone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20"
+                    : "border-zinc-300 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-950/50 hover:border-zinc-400 dark:hover:border-zinc-600"
+                }`}
+              >
                 <input
-                  type="url"
-                  placeholder="Dán link ảnh (HTTPS URL)..."
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  className="flex-1 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                  id="direct-image-upload"
+                  type="file"
+                  multiple
+                  accept="image/png, image/jpeg, image/webp, image/gif"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={uploadingImages}
                 />
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="px-4 py-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold"
+
+                <label
+                  htmlFor="direct-image-upload"
+                  className="cursor-pointer flex flex-col items-center justify-center gap-2"
                 >
-                  Thêm ảnh
-                </button>
+                  <div className="w-12 h-12 rounded-full bg-white dark:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-200">
+                    {uploadingImages ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                    ) : (
+                      <UploadCloud className="w-6 h-6" />
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">
+                      {uploadingImages
+                        ? "Đang xử lý và tối ưu ảnh..."
+                        : "Bấm để chọn ảnh từ máy tính"}
+                    </p>
+                    <p className="text-zinc-500 text-[11px] mt-0.5">
+                      Hoặc kéo thả nhiều file ảnh trực tiếp vào đây
+                    </p>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-medium shadow-sm hover:opacity-90 transition-opacity mt-1">
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Chọn ảnh từ thiết bị</span>
+                  </span>
+                </label>
               </div>
 
               {/* Images preview grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {images.map((url, idx) => (
-                  <div
-                    key={idx}
-                    className="relative aspect-square rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 overflow-hidden group"
-                  >
-                    <Image
-                      src={url}
-                      alt={`Ảnh ${idx + 1}`}
-                      fill
-                      sizes="150px"
-                      className="object-cover"
-                    />
-                    {idx === 0 && (
-                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-zinc-900/90 text-white text-[9px] font-bold">
-                        Ảnh chính
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="absolute top-1 right-1 p-1 rounded-full bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Xóa ảnh"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+              {images.length > 0 ? (
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                    <span>Danh sách ảnh đã tải lên:</span>
+                    <span>Bấm &quot;Đặt làm ảnh chính&quot; để đổi ảnh bìa</span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {images.map((url, idx) => {
+                      const isPrimary = idx === 0;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`relative aspect-square rounded-lg border overflow-hidden group transition-all ${
+                            isPrimary
+                              ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm"
+                              : "border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950"
+                          }`}
+                        >
+                          <Image
+                            src={url}
+                            alt={`Ảnh ${idx + 1}`}
+                            fill
+                            sizes="180px"
+                            unoptimized={url.startsWith("data:")}
+                            className="object-cover"
+                          />
+
+                          {/* Primary Badge */}
+                          {isPrimary ? (
+                            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold shadow-sm flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-white" />
+                              Ảnh chính
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleSetPrimary(idx)}
+                              className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-black/60 hover:bg-black/90 text-white text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Đặt làm ảnh đại diện chính"
+                            >
+                              Đặt làm ảnh chính
+                            </button>
+                          )}
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute top-1.5 right-1.5 p-1 rounded-full bg-red-600/90 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                            title="Xóa ảnh này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="py-3 text-center text-zinc-400 text-xs italic">
+                  Chưa có ảnh nào. Vui lòng tải lên ít nhất 1 ảnh cho sản phẩm.
+                </div>
+              )}
             </div>
           </div>
 

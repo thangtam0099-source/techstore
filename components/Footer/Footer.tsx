@@ -19,7 +19,7 @@ export default function Footer() {
               <span className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-black text-xs">
                 TS
               </span>
-              <span>TechStore</span>
+              <span>Tâm Store</span>
             </Link>
             <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 max-w-sm">
               Cửa hàng thiết bị công nghệ cá nhân cao cấp. Xem sản phẩm, chọn cấu hình và
@@ -91,7 +91,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 mt-8 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© {new Date().getFullYear()} TechStore. Thiết bị công nghệ cho cuộc sống hiện đại.</p>
+          <p>© {new Date().getFullYear()} Tâm Store. Thiết bị công nghệ cho cuộc sống hiện đại.</p>
           <p className="text-zinc-400">Thiết kế tối giản &amp; Tối ưu trải nghiệm mua hàng</p>
         </div>
       </div>

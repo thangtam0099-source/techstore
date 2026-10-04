@@ -48,7 +48,7 @@ export default function Header() {
               <span className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-black text-sm">
                 TS
               </span>
-              <span>TechStore</span>
+              <span>Tâm Store</span>
             </Link>
 
             {/* Desktop Navigation Links */}

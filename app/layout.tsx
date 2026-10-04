@@ -16,13 +16,13 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata: Metadata = {
-  title: "TechStore - Thiết bị công nghệ cho cuộc sống hiện đại",
+  title: "Tâm Store - Thiết bị công nghệ cho cuộc sống hiện đại",
   description:
-    "Cửa hàng thiết bị công nghệ chính hãng. Khám phá điện thoại, laptop, phụ kiện cao cấp và liên hệ đặt mua trực tiếp qua Messenger.",
-  keywords: ["techstore", "công nghệ", "điện thoại", "laptop", "tai nghe", "mua hàng qua messenger"],
+    "Cửa hàng thiết bị công nghệ chính hãng Tâm Store. Khám phá điện thoại, laptop, phụ kiện cao cấp và liên hệ đặt mua trực tiếp qua Messenger.",
+  keywords: ["tâm store", "tam store", "công nghệ", "điện thoại", "laptop", "tai nghe", "mua hàng qua messenger"],
   openGraph: {
-    title: "TechStore - Thiết bị công nghệ cho cuộc sống hiện đại",
-    description: "Cửa hàng công nghệ cá nhân, tư vấn và mua sắm trực tiếp qua Messenger.",
+    title: "Tâm Store - Thiết bị công nghệ cho cuộc sống hiện đại",
+    description: "Cửa hàng công nghệ cá nhân Tâm Store, tư vấn và mua sắm trực tiếp qua Messenger.",
     type: "website",
   },
 };
@@ -39,7 +39,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('techstore_theme');
+                const theme = localStorage.getItem('tamstore_theme') || localStorage.getItem('techstore_theme');
                 const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 if (isDark) {
                   document.documentElement.classList.add('dark');

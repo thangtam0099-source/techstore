@@ -10,5 +10,12 @@ export async function POST() {
     expires: new Date(0),
     path: "/",
   });
+  response.cookies.set({
+    name: "techstore_session",
+    value: "",
+    httpOnly: true,
+    expires: new Date(0),
+    path: "/",
+  });
   return response;
 }

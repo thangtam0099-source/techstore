@@ -2,9 +2,9 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
 
-const COOKIE_NAME = "techstore_session";
+const COOKIE_NAME = "tamstore_session";
 const SECRET_KEY = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "techstore-super-secure-random-secret-key-32-chars-long"
+  process.env.AUTH_SECRET || "tamstore-super-secure-random-secret-key-32-chars-long"
 );
 
 export interface SessionPayload {
@@ -39,7 +39,7 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
 export async function getCurrentUser() {
   try {
     const cookieStore = cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
+    const token = cookieStore.get(COOKIE_NAME)?.value || cookieStore.get("techstore_session")?.value;
     if (!token) return null;
 
     const payload = await verifySessionToken(token);

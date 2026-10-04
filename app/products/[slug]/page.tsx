@@ -23,18 +23,18 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   if (!product) {
     return {
-      title: "Không tìm thấy sản phẩm - TechStore",
+      title: "Không tìm thấy sản phẩm - Tâm Store",
     };
   }
 
   const imageUrl = product.images[0]?.imageUrl || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop";
 
   return {
-    title: `${product.name} | TechStore Chính Hãng`,
+    title: `${product.name} | Tâm Store Chính Hãng`,
     description: product.shortDescription || `${product.name} chính hãng từ thương hiệu ${product.brand.name}. Tư vấn và mua hàng trực tiếp qua Messenger.`,
     openGraph: {
-      title: `${product.name} - TechStore`,
-      description: product.shortDescription || `${product.name} chính hãng tại TechStore.`,
+      title: `${product.name} - Tâm Store`,
+      description: product.shortDescription || `${product.name} chính hãng tại Tâm Store.`,
       images: [{ url: imageUrl }],
     },
   };

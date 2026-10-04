@@ -9,7 +9,7 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("techstore_theme") as "light" | "dark" | null;
+    const savedTheme = (localStorage.getItem("tamstore_theme") || localStorage.getItem("techstore_theme")) as "light" | "dark" | null;
     if (savedTheme) {
       setTheme(savedTheme);
       if (savedTheme === "dark") {
@@ -29,7 +29,7 @@ export default function ThemeToggle() {
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
-    localStorage.setItem("techstore_theme", nextTheme);
+    localStorage.setItem("tamstore_theme", nextTheme);
 
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");

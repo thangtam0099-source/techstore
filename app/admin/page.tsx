@@ -181,6 +181,7 @@ export default async function AdminDashboardPage() {
                     alt={p.name}
                     fill
                     sizes="48px"
+                    unoptimized={Boolean(p.images[0]?.imageUrl?.startsWith("data:"))}
                     className="object-cover"
                   />
                 </div>
@@ -230,6 +231,7 @@ export default async function AdminDashboardPage() {
                     alt={p.name}
                     fill
                     sizes="48px"
+                    unoptimized={Boolean(p.images[0]?.imageUrl?.startsWith("data:"))}
                     className="object-cover"
                   />
                 </div>

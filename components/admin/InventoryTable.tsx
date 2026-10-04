@@ -157,6 +157,7 @@ export default function InventoryTable({
                           src={p.images[0]?.imageUrl || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop"}
                           alt={p.name}
                           fill
+                          unoptimized={Boolean(p.images[0]?.imageUrl?.startsWith("data:"))}
                           sizes="36px"
                           className="object-cover"
                         />

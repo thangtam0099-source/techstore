@@ -66,7 +66,7 @@ export default function AdminSidebar({
               <span className="w-7 h-7 rounded bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-xs font-black">
                 TS
               </span>
-              <span>Admin Center</span>
+              <span>Tâm Store Admin</span>
             </Link>
           )}
 

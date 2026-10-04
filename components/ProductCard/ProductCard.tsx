@@ -76,6 +76,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           src={imageUrl}
           alt={product.name}
           fill
+          unoptimized={imageUrl.startsWith("data:")}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
         />
@@ -101,7 +102,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         {/* Brand & Stock status */}
         <div className="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 mb-1">
-          <span className="font-medium truncate">{product.brand?.name || "TechStore"}</span>
+          <span className="font-medium truncate">{product.brand?.name || "Tâm Store"}</span>
           <span className={isOutOfStock ? "text-red-500 font-medium" : "text-emerald-600 dark:text-emerald-400"}>
             {isOutOfStock ? "Hết hàng" : "Còn hàng"}
           </span>
