@@ -74,6 +74,13 @@ export default function ProductForm({
   const [brandId, setBrandId] = useState(
     initialData?.brandId || (brands[0]?.id ?? "")
   );
+  const [brandName, setBrandName] = useState(() => {
+    if (initialData?.brandId) {
+      const found = brands.find((b) => b.id === initialData.brandId);
+      if (found) return found.name;
+    }
+    return brands[0]?.name || "";
+  });
   const [categoryId, setCategoryId] = useState(
     initialData?.categoryId || (categories[0]?.id ?? "")
   );
@@ -96,16 +103,14 @@ export default function ProductForm({
 
   const handleNameChange = (val: string) => {
     setName(val);
-    if (!isEdit && !slug) {
-      const generatedSlug = val
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[đĐ]/g, "d")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-      setSlug(generatedSlug);
-    }
+    const generatedSlug = val
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+    setSlug(generatedSlug);
   };
 
   // Specifications
@@ -257,12 +262,22 @@ export default function ProductForm({
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !sku || !brandId || !categoryId || !price) {
+    const effectiveBrandName = brandName.trim();
+    if (!name.trim() || !sku.trim() || !effectiveBrandName || !categoryId || !price) {
       showToast("Vui lòng điền đầy đủ các mục bắt buộc (*).", "error");
       return;
     }
 
     setLoading(true);
+
+    // Auto-generate clean slug from name if needed
+    const finalSlug = (slug || name)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "") || `sp-${Date.now()}`;
 
     // Build specs JSON object
     const specsObject: Record<string, string> = {};
@@ -273,10 +288,11 @@ export default function ProductForm({
     });
 
     const payload = {
-      name,
-      slug,
-      sku,
+      name: name.trim(),
+      slug: finalSlug,
+      sku: sku.trim(),
       brandId,
+      brandName: effectiveBrandName,
       categoryId,
       price: parseFloat(price),
       salePrice: salePrice ? parseFloat(salePrice) : null,
@@ -373,34 +389,18 @@ export default function ProductForm({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-semibold block mb-1">
-                    Slug URL *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    placeholder="iphone-16-pro-max"
-                    className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-mono text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold block mb-1">
-                    Mã SKU *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={sku}
-                    onChange={(e) => setSku(e.target.value)}
-                    placeholder="IP16PM-256"
-                    className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-mono text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                  />
-                </div>
+              <div>
+                <label className="font-semibold block mb-1">
+                  Mã SKU *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                  placeholder="Ví dụ: IP16PM-256"
+                  className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 font-mono text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                />
               </div>
 
               <div>
@@ -754,17 +754,30 @@ export default function ProductForm({
                 <label className="font-semibold block mb-1">
                   Thương hiệu *
                 </label>
-                <select
-                  value={brandId}
-                  onChange={(e) => setBrandId(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none"
-                >
+                <input
+                  type="text"
+                  required
+                  list="brands-datalist"
+                  value={brandName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setBrandName(val);
+                    const found = brands.find(
+                      (b) => b.name.toLowerCase() === val.trim().toLowerCase()
+                    );
+                    if (found) setBrandId(found.id);
+                  }}
+                  placeholder="Nhập thương hiệu (e.g. Apple, ASUS, Xiaomi...)"
+                  className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                />
+                <datalist id="brands-datalist">
                   {brands.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
+                    <option key={b.id} value={b.name} />
                   ))}
-                </select>
+                </datalist>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  Gõ tên thương hiệu từ bàn phím hoặc chọn từ danh sách gợi ý.
+                </p>
               </div>
 
               <div>

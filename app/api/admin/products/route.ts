@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
       slug,
       sku,
       brandId,
+      brandName,
       categoryId,
       price,
       salePrice,
@@ -26,28 +27,58 @@ export async function POST(req: NextRequest) {
       variants,
     } = body;
 
-    if (!name || !sku || !brandId || !categoryId || !price) {
+    let resolvedBrandId = brandId;
+    if (brandName && typeof brandName === "string" && brandName.trim()) {
+      const trimmedBrand = brandName.trim();
+      const allBrands = await prisma.brand.findMany();
+      const matched = allBrands.find(
+        (b) => b.name.toLowerCase() === trimmedBrand.toLowerCase()
+      );
+      if (matched) {
+        resolvedBrandId = matched.id;
+      } else {
+        const brandSlug =
+          trimmedBrand
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[đĐ]/g, "d")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)+/g, "") || `brand-${Date.now()}`;
+
+        const existingSlug = allBrands.find((b) => b.slug === brandSlug);
+        const finalBrandSlug = existingSlug ? `${brandSlug}-${Date.now().toString().slice(-4)}` : brandSlug;
+
+        const newBrand = await prisma.brand.create({
+          data: {
+            name: trimmedBrand,
+            slug: finalBrandSlug,
+          },
+        });
+        resolvedBrandId = newBrand.id;
+      }
+    }
+
+    if (!name || !sku || !resolvedBrandId || !categoryId || !price) {
       return NextResponse.json(
-        { error: "Vui lòng điền đầy đủ các thông tin bắt buộc." },
+        { error: "Vui lòng điền đầy đủ các thông tin bắt buộc (Tên, SKU, Thương hiệu, Danh mục, Giá)." },
         { status: 400 }
       );
     }
 
-    const cleanSlug =
+    let cleanSlug =
       slug?.trim() ||
       name
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)+/g, "");
+        .replace(/(^-|-$)+/g, "") || `sp-${Date.now()}`;
 
     const existingSlug = await prisma.product.findUnique({ where: { slug: cleanSlug } });
     if (existingSlug) {
-      return NextResponse.json(
-        { error: "Slug này đã tồn tại, vui lòng chọn slug khác." },
-        { status: 400 }
-      );
+      cleanSlug = `${cleanSlug}-${Date.now().toString().slice(-4)}`;
     }
 
     const existingSku = await prisma.product.findUnique({ where: { sku: sku.trim() } });
@@ -63,7 +94,7 @@ export async function POST(req: NextRequest) {
         name: name.trim(),
         slug: cleanSlug,
         sku: sku.trim(),
-        brandId,
+        brandId: resolvedBrandId,
         categoryId,
         price: parseFloat(price),
         salePrice: salePrice ? parseFloat(salePrice) : null,

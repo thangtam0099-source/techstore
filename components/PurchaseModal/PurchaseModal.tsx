@@ -110,18 +110,34 @@ export default function PurchaseModal() {
             </pre>
           </div>
 
-          {copied && (
-            <div className="p-3 bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 flex items-center justify-between">
-              <span>Hãy mở Messenger và gửi nội dung vừa sao chép cho shop.</span>
-              <button
-                type="button"
-                onClick={handleOpenMessenger}
-                className="font-medium text-zinc-900 dark:text-white underline hover:no-underline ml-2 whitespace-nowrap"
-              >
-                Mở Messenger ngay →
-              </button>
+          {/* Note hướng dẫn mua hàng */}
+          <div
+            className={`p-3.5 rounded-lg border text-xs leading-relaxed transition-all ${
+              copied
+                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
+                : "bg-blue-50/80 dark:bg-blue-950/30 border-blue-200/80 dark:border-blue-900/40 text-blue-900 dark:text-blue-200"
+            }`}
+          >
+            <div className="flex items-start gap-2.5">
+              <span className="text-sm shrink-0">{copied ? "✓" : "💡"}</span>
+              <div className="space-y-0.5">
+                <p className="font-semibold text-[12px]">
+                  {copied ? "Đã sao chép nội dung đơn hàng!" : "Lưu ý hướng dẫn gửi đơn:"}
+                </p>
+                <p className="text-zinc-600 dark:text-zinc-300 text-[11px] leading-relaxed">
+                  {copied ? (
+                    <>
+                      Bây giờ bạn hãy nhấn nút <strong>&quot;Mở Messenger&quot;</strong> bên dưới, dán (Paste) nội dung vào khung chat và gửi cho người bán nhé.
+                    </>
+                  ) : (
+                    <>
+                      Quý khách hãy nhấn vào nút <strong>&quot;Sao chép nội dung&quot;</strong> trước, sau đó nhấn vào <strong>&quot;Mở Messenger&quot;</strong> để dán (Paste) và gửi thông tin sản phẩm cho người bán.
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Footer Actions */}
