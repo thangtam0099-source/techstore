@@ -67,7 +67,7 @@ export default async function HomePage() {
             <div className="lg:col-span-7 space-y-4">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Cửa hàng công nghệ cá nhân chính hãng
+                Nexus Gaming • Công nghệ &amp; Gaming Gear chính hãng
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-tight">

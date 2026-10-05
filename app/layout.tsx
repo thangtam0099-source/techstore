@@ -18,15 +18,37 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tam-store.vercel.app"),
-  title: "Tâm Store - Thiết bị công nghệ cho cuộc sống hiện đại",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://nexus-gaming.vercel.app"),
+  title: "Nexus Gaming - Thiết bị công nghệ & Gaming Gear hàng đầu",
   description:
-    "Cửa hàng thiết bị công nghệ chính hãng Tâm Store. Khám phá điện thoại, laptop, phụ kiện cao cấp và liên hệ đặt mua trực tiếp qua Messenger.",
-  keywords: ["tâm store", "tam store", "công nghệ", "điện thoại", "laptop", "tai nghe", "mua hàng qua messenger"],
+    "Nexus Gaming - Hệ thống phân phối thiết bị công nghệ, laptop, linh kiện máy tính và gaming gear cao cấp chính hãng. Tư vấn cấu hình và đặt mua trực tiếp qua Messenger.",
+  keywords: [
+    "nexus gaming",
+    "gaming gear",
+    "thiết bị công nghệ",
+    "laptop gaming",
+    "linh kiện máy tính",
+    "bàn phím cơ",
+    "tai nghe gaming",
+    "mua hàng qua messenger",
+  ],
+  icons: {
+    icon: "https://i.ibb.co/kscwh90r/1791124308042-505601018264934382-505601018264934382-7dda37cbc2520338fabb83f6966bb96b.jpg",
+    apple: "https://i.ibb.co/kscwh90r/1791124308042-505601018264934382-505601018264934382-7dda37cbc2520338fabb83f6966bb96b.jpg",
+  },
   openGraph: {
-    title: "Tâm Store - Thiết bị công nghệ cho cuộc sống hiện đại",
-    description: "Cửa hàng công nghệ cá nhân Tâm Store, tư vấn và mua sắm trực tiếp qua Messenger.",
+    title: "Nexus Gaming - Thiết bị công nghệ & Gaming Gear hàng đầu",
+    description:
+      "Nexus Gaming - Hệ thống phân phối thiết bị công nghệ, gaming gear, laptop và linh kiện máy tính chính hãng.",
     type: "website",
+    images: [
+      {
+        url: "https://i.ibb.co/kscwh90r/1791124308042-505601018264934382-505601018264934382-7dda37cbc2520338fabb83f6966bb96b.jpg",
+        width: 800,
+        height: 800,
+        alt: "Nexus Gaming Logo",
+      },
+    ],
   },
 };
 
@@ -44,7 +66,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('tamstore_theme') || localStorage.getItem('techstore_theme');
+                const theme = localStorage.getItem('nexusgaming_theme') || localStorage.getItem('tamstore_theme') || localStorage.getItem('techstore_theme');
                 const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 if (isDark) {
                   document.documentElement.classList.add('dark');

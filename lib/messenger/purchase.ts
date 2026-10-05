@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/utils/format";
 
 export interface SingleProductPurchaseInfo {
+  id?: string;
   name: string;
   sku: string;
   price: number;
@@ -8,6 +9,7 @@ export interface SingleProductPurchaseInfo {
 }
 
 export interface CartPurchaseItem {
+  productId?: string;
   name: string;
   variant?: string | null;
   quantity: number;

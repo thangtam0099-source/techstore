@@ -7,9 +7,23 @@ import { copyPurchaseMessage, openMessenger } from "@/lib/messenger/purchase";
 import { useToast } from "@/components/Toast/ToastContext";
 
 export default function PurchaseModal() {
-  const { isOpen, message, closePurchaseModal } = usePurchaseModal();
+  const { isOpen, message, purchaseItems, closePurchaseModal } = usePurchaseModal();
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
+
+  // Ghi nhận đơn hàng vào hệ thống cho khách hàng đã đăng nhập để cấp quyền đánh giá sản phẩm đã mua
+  const recordPurchase = async () => {
+    if (!purchaseItems || purchaseItems.length === 0) return;
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: purchaseItems }),
+      });
+    } catch (e) {
+      console.warn("Could not record purchase history:", e);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +51,7 @@ export default function PurchaseModal() {
   if (!isOpen) return null;
 
   const handleCopy = async () => {
+    recordPurchase();
     const success = await copyPurchaseMessage(message);
     if (success) {
       setCopied(true);
@@ -47,6 +62,7 @@ export default function PurchaseModal() {
   };
 
   const handleOpenMessenger = async () => {
+    recordPurchase();
     await openMessenger(message);
     showToast("✓ Đã sao chép nội dung và mở Messenger");
     closePurchaseModal();

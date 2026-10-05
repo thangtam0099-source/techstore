@@ -16,6 +16,7 @@ import {
 import ThemeToggle from "@/components/ThemeToggle/ThemeToggle";
 import { useCart } from "@/components/Cart/CartContext";
 import { useAuth } from "@/components/Auth/AuthContext";
+import Logo from "@/components/Logo/Logo";
 
 export default function Header() {
   const router = useRouter();
@@ -41,15 +42,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <div className="flex items-center gap-6">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-white"
-            >
-              <span className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-black text-sm">
-                TS
-              </span>
-              <span>Tâm Store</span>
-            </Link>
+            <Logo size="md" href="/" />
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-300">

@@ -259,10 +259,18 @@ export default async function AdminDashboardPage() {
 
       {/* Recent Activity / Customer Reviews */}
       <div className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4">
-        <h2 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-          Đánh giá &amp; Hoạt động gần đây từ khách hàng
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            Đánh giá &amp; Hoạt động gần đây từ khách hàng
+          </h2>
+          <Link
+            href="/admin/reviews"
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          >
+            Quản lý &amp; Xóa đánh giá →
+          </Link>
+        </div>
 
         {recentReviews.length === 0 ? (
           <p className="text-xs text-zinc-500 py-4 text-center">Chưa có đánh giá nào.</p>

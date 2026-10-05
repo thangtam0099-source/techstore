@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { getMessengerUrl } from "@/lib/messenger/purchase";
+import Logo from "@/components/Logo/Logo";
 
 export default function Footer() {
   const messengerUrl = getMessengerUrl();
@@ -12,19 +13,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Col 1: Brand Info */}
           <div className="md:col-span-2 space-y-3">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-white"
-            >
-              <span className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-black text-xs">
-                TS
-              </span>
-              <span>Tâm Store</span>
-            </Link>
+            <Logo size="md" href="/" />
             <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 max-w-sm">
-              Cửa hàng thiết bị công nghệ cá nhân cao cấp. Xem sản phẩm, chọn cấu hình và
-              liên hệ trực tiếp với chủ shop qua Messenger để được tư vấn và giao hàng nhanh
-              chóng.
+              Hệ thống chuyên cung cấp thiết bị công nghệ, gaming gear, laptop và linh kiện máy tính cao cấp. Tư vấn cấu hình chuyên nghiệp và liên hệ đặt hàng tiện lợi trực tiếp qua Messenger.
             </p>
             <div className="pt-2">
               <a
@@ -91,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 mt-8 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© {new Date().getFullYear()} Tâm Store. Thiết bị công nghệ cho cuộc sống hiện đại.</p>
+          <p>© {new Date().getFullYear()} Nexus Gaming. Thiết bị công nghệ &amp; Gaming Gear hàng đầu.</p>
           <p className="text-zinc-400">Thiết kế tối giản &amp; Tối ưu trải nghiệm mua hàng</p>
         </div>
       </div>

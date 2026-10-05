@@ -16,6 +16,7 @@ export default function CartPage() {
     if (items.length === 0) return;
     openCartPurchase(
       items.map((it) => ({
+        productId: it.productId,
         name: it.name,
         variant: it.variant,
         quantity: it.quantity,

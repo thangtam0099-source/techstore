@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import AdminLayoutClient from "@/components/admin/AdminLayoutClient";
 
 export const metadata = {
-  title: "Admin Dashboard - Tâm Store",
+  title: "Admin Dashboard - Nexus Gaming",
 };
 
 export default async function AdminLayout({

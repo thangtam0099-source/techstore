@@ -25,7 +25,7 @@ export default function AdminHeader({
         </button>
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
           <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          Hệ thống Quản Trị - Tâm Store
+          Hệ thống Quản Trị - Nexus Gaming
         </span>
       </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthContext";
 import { Lock, Mail, ArrowRight } from "lucide-react";
+import Logo from "@/components/Logo/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,15 +43,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md p-6 sm:p-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm space-y-6">
-        <div className="text-center space-y-1.5">
-          <div className="w-10 h-10 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black text-base flex items-center justify-center mx-auto mb-2">
-            TS
+        <div className="text-center space-y-1.5 flex flex-col items-center">
+          <div className="mb-2">
+            <Logo size="lg" showText={false} href={null} />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Đăng nhập Tâm Store
+            Đăng nhập Nexus Gaming
           </h1>
           <p className="text-xs text-zinc-500">
-            Đăng nhập để theo dõi đánh giá và quản lý tài khoản
+            Đăng nhập để theo dõi đơn hàng, gửi đánh giá và nhận ưu đãi
           </p>
         </div>
 

@@ -27,18 +27,18 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   if (!product) {
     return {
-      title: "Không tìm thấy sản phẩm - Tâm Store",
+      title: "Không tìm thấy sản phẩm - Nexus Gaming",
     };
   }
 
   const imageUrl = product.images[0]?.imageUrl || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop";
 
   return {
-    title: `${product.name} | Tâm Store Chính Hãng`,
+    title: `${product.name} | Nexus Gaming Chính Hãng`,
     description: product.shortDescription || `${product.name} chính hãng từ thương hiệu ${product.brand.name}. Tư vấn và mua hàng trực tiếp qua Messenger.`,
     openGraph: {
-      title: `${product.name} - Tâm Store`,
-      description: product.shortDescription || `${product.name} chính hãng tại Tâm Store.`,
+      title: `${product.name} - Nexus Gaming`,
+      description: product.shortDescription || `${product.name} chính hãng tại Nexus Gaming.`,
       images: [{ url: imageUrl }],
     },
   };

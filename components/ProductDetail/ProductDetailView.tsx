@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Star,
   ShieldCheck,
@@ -12,11 +13,16 @@ import {
   ShoppingCart,
   Check,
   MessageCircle,
+  Trash2,
+  Lock,
+  CheckCircle2,
+  ShieldAlert,
 } from "lucide-react";
 import { formatCurrency, calculateDiscount, formatDate } from "@/lib/utils/format";
 import { usePurchaseModal } from "@/components/PurchaseModal/PurchaseModalContext";
 import { useCart } from "@/components/Cart/CartContext";
 import { useToast } from "@/components/Toast/ToastContext";
+import { useAuth } from "@/components/Auth/AuthContext";
 
 interface ProductDetailProps {
   product: {
@@ -55,6 +61,7 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
   const { openSinglePurchase } = usePurchaseModal();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
@@ -67,6 +74,38 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewsList, setReviewsList] = useState(product.reviews);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
+
+  // Quyền đánh giá: Chỉ khách hàng đã mua sản phẩm (hoặc Admin) mới được đánh giá
+  const [eligibility, setEligibility] = useState<{
+    canReview: boolean;
+    hasPurchased: boolean;
+    isAdmin: boolean;
+    isLoggedIn: boolean;
+  } | null>(null);
+  const [checkingEligibility, setCheckingEligibility] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkEligible = async () => {
+      setCheckingEligibility(true);
+      try {
+        const res = await fetch(`/api/reviews?productId=${product.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) setEligibility(data);
+        }
+      } catch (e) {
+        console.error("Failed to check review eligibility", e);
+      } finally {
+        if (isMounted) setCheckingEligibility(false);
+      }
+    };
+    checkEligible();
+    return () => {
+      isMounted = false;
+    };
+  }, [product.id, user]);
 
   const selectedVariant = product.variants.find((v) => v.id === selectedVariantId);
   const currentPrice = selectedVariant?.price || product.price;
@@ -109,6 +148,7 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
     if (isOutOfStock) return;
     openSinglePurchase(
       {
+        id: product.id,
         name: product.name,
         sku: product.sku,
         price: currentPrice,
@@ -153,16 +193,40 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
       });
       const data = await res.json();
       if (!res.ok) {
-        showToast(data.error || "Vui lòng đăng nhập để gửi đánh giá.", "error");
+        showToast(data.error || "Bạn chưa có quyền đánh giá sản phẩm này.", "error");
       } else {
         setReviewsList((prev) => [data.review, ...prev]);
         setReviewComment("");
-        showToast("Cảm ơn bạn đã gửi đánh giá sản phẩm!");
+        showToast("✓ Cảm ơn bạn đã gửi đánh giá sản phẩm!");
       }
     } catch {
       showToast("Lỗi khi gửi đánh giá.", "error");
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  // Quản trị viên (Admin) xóa đánh giá không đúng
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa đánh giá này không? Thao tác này sẽ gỡ bỏ đánh giá khỏi hệ thống.")) {
+      return;
+    }
+    setDeletingReviewId(reviewId);
+    try {
+      const res = await fetch(`/api/reviews?id=${reviewId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReviewsList((prev) => prev.filter((r) => r.id !== reviewId));
+        showToast("✓ Đã xóa đánh giá sản phẩm thành công.");
+      } else {
+        showToast(data.error || "Không thể xóa đánh giá.", "error");
+      }
+    } catch {
+      showToast("Lỗi kết nối khi xóa đánh giá.", "error");
+    } finally {
+      setDeletingReviewId(null);
     }
   };
 
@@ -532,83 +596,166 @@ export default function ProductDetailView({ product }: ProductDetailProps) {
           </div>
         </div>
 
-        {/* Review Form */}
-        <form
-          onSubmit={handleReviewSubmit}
-          className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 space-y-4"
-        >
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-            Viết đánh giá của bạn
-          </h3>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500">Mức độ hài lòng:</span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setUserRating(star)}
-                  className="p-0.5 focus:outline-none"
-                >
-                  <Star
-                    className={`w-5 h-5 ${
-                      star <= userRating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-zinc-300 dark:text-zinc-700"
-                    }`}
-                  />
-                </button>
-              ))}
+        {/* Review Form / Eligibility States */}
+        {checkingEligibility ? (
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 text-xs text-zinc-500 animate-pulse">
+            Đang kiểm tra quyền gửi đánh giá...
+          </div>
+        ) : !eligibility?.isLoggedIn ? (
+          /* Case 1: Chưa đăng nhập */
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start gap-2.5">
+              <Lock className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  Đăng nhập để viết đánh giá
+                </p>
+                <p className="text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                  Chỉ những khách hàng đã mua sản phẩm này tại Nexus Gaming mới có quyền gửi nhận xét, nhằm ngăn chặn tình trạng đánh giá không đúng thực tế.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 font-medium shrink-0 transition-colors"
+            >
+              Đăng nhập ngay
+            </Link>
+          </div>
+        ) : !eligibility?.canReview ? (
+          /* Case 2: Đã đăng nhập nhưng chưa mua sản phẩm này */
+          <div className="p-4 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 text-xs flex items-start gap-3">
+            <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div className="space-y-1">
+              <p className="font-semibold text-amber-900 dark:text-amber-200">
+                Đánh giá dành riêng cho khách hàng đã mua sản phẩm
+              </p>
+              <p className="text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                Tài khoản của bạn chưa có lịch sử mua sản phẩm này tại Nexus Gaming. Để bảo vệ trải nghiệm của người mua và tránh đánh giá sai lệch, hệ thống chỉ cho phép khách hàng đã đặt mua thành công gửi đánh giá.
+              </p>
             </div>
           </div>
-
-          <textarea
-            rows={3}
-            placeholder="Chia sẻ cảm nhận của bạn về sản phẩm (chất lượng, đóng gói, trải nghiệm sử dụng)..."
-            value={reviewComment}
-            onChange={(e) => setReviewComment(e.target.value)}
-            className="w-full p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-          />
-
-          <button
-            type="submit"
-            disabled={submittingReview}
-            className="px-4 py-2 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 transition-colors disabled:opacity-50"
+        ) : (
+          /* Case 3: Đã mua sản phẩm hoặc là Admin - Cho phép gửi đánh giá */
+          <form
+            onSubmit={handleReviewSubmit}
+            className="p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 space-y-4"
           >
-            {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
-          </button>
-        </form>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+                Viết đánh giá của bạn
+              </h3>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[11px] font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>
+                  {eligibility?.isAdmin
+                    ? "Quản trị viên (Admin)"
+                    : "✓ Người mua đã xác minh"}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Mức độ hài lòng:</span>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setUserRating(star)}
+                    className="p-0.5 focus:outline-none"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${
+                        star <= userRating
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-zinc-300 dark:text-zinc-700"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <textarea
+              rows={3}
+              placeholder="Chia sẻ cảm nhận của bạn về sản phẩm (chất lượng, đóng gói, trải nghiệm sử dụng)..."
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              className="w-full p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+            />
+
+            <button
+              type="submit"
+              disabled={submittingReview}
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 transition-colors disabled:opacity-50"
+            >
+              {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+            </button>
+          </form>
+        )}
 
         {/* Customer Reviews List */}
         <div className="space-y-4">
-          {reviewsList.map((rev) => (
-            <div
-              key={rev.id}
-              className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-2"
-            >
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-900 dark:text-white">
-                  {rev.user?.name || "Khách hàng"}
-                </span>
-                <span className="text-zinc-400">{formatDate(rev.createdAt)}</span>
+          {reviewsList.length === 0 ? (
+            <p className="text-xs text-zinc-500 py-6 text-center">
+              Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm và chia sẻ nhận xét!
+            </p>
+          ) : (
+            reviewsList.map((rev) => (
+              <div
+                key={rev.id}
+                className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-2 relative group"
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-zinc-900 dark:text-white">
+                      {rev.user?.name || "Khách hàng"}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      Đã mua tại Nexus Gaming
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-zinc-400">{formatDate(rev.createdAt)}</span>
+
+                    {/* Nút xóa đánh giá cho Admin */}
+                    {user?.role === "ADMIN" && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteReview(rev.id)}
+                        disabled={deletingReviewId === rev.id}
+                        className="inline-flex items-center gap-1 text-[11px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 px-2 py-1 rounded transition-colors"
+                        title="Xóa đánh giá này (Dành cho Admin)"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Xóa</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-0.5 text-amber-400">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-3.5 h-3.5 ${
+                        i < rev.rating
+                          ? "fill-amber-400"
+                          : "text-zinc-200 dark:text-zinc-800"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  {rev.comment}
+                </p>
               </div>
-              <div className="flex items-center gap-0.5 text-amber-400">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-3.5 h-3.5 ${
-                      i < rev.rating
-                        ? "fill-amber-400"
-                        : "text-zinc-200 dark:text-zinc-800"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                {rev.comment}
-              </p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

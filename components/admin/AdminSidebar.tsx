@@ -16,8 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/components/Auth/AuthContext";
+import Logo from "@/components/Logo/Logo";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -25,6 +27,7 @@ const navItems = [
   { href: "/admin/products/new", label: "Thêm sản phẩm", icon: PlusCircle },
   { href: "/admin/categories", label: "Danh mục", icon: FolderTree },
   { href: "/admin/brands", label: "Thương hiệu", icon: Tag },
+  { href: "/admin/reviews", label: "Đánh giá", icon: MessageSquare },
   { href: "/admin/inventory", label: "Kho hàng", icon: Boxes },
   { href: "/admin/users", label: "Người dùng", icon: Users },
   { href: "/admin/settings", label: "Cài đặt", icon: Settings },
@@ -63,17 +66,15 @@ export default function AdminSidebar({
         <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800">
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-2 font-bold text-sm text-zinc-900 dark:text-white">
-              <span className="w-7 h-7 rounded bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-xs font-black">
-                TS
-              </span>
-              <span>Tâm Store Admin</span>
+              <Logo size="sm" showText={false} href={null} />
+              <span className="truncate">Nexus Gaming</span>
             </Link>
           )}
 
           {collapsed && (
-            <span className="w-7 h-7 mx-auto rounded bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center text-xs font-black">
-              TS
-            </span>
+            <div className="mx-auto">
+              <Logo size="sm" showText={false} href={null} />
+            </div>
           )}
 
           <button

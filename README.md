@@ -1,6 +1,6 @@
-# ⚡ Tâm Store - Website Bán Hàng Điện Tử Cá Nhân (Messenger Commerce)
+# ⚡ Nexus Gaming - Website Bán Hàng Thiết Bị Công Nghệ & Gaming Gear (Messenger Commerce)
 
-Website thương mại điện tử chuyên ngành thiết bị công nghệ và điện tử được xây dựng theo mô hình **cửa hàng cá nhân hiện đại**: tập trung tối đa vào sản phẩm, thông tin cấu hình, thiết kế tối giản và trải nghiệm mua sắm nhanh gọn thông qua **Facebook Messenger** hoặc **Sao chép nội dung đơn hàng** để gửi trực tiếp cho chủ shop.
+Website thương mại điện tử chuyên ngành thiết bị công nghệ, gaming gear và linh kiện điện tử được xây dựng theo mô hình **cửa hàng cá nhân hiện đại**: tập trung tối đa vào sản phẩm, thông tin cấu hình, thiết kế tối giản và trải nghiệm mua sắm nhanh gọn thông qua **Facebook Messenger** hoặc **Sao chép nội dung đơn hàng** để gửi trực tiếp cho chủ shop.
 
 ---
 

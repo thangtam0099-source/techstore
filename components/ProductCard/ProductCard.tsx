@@ -45,6 +45,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
     e.stopPropagation();
     if (isOutOfStock) return;
     openSinglePurchase({
+      id: product.id,
       name: product.name,
       sku: product.sku,
       price: product.price,
@@ -106,7 +107,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         {/* Brand & Stock status */}
         <div className="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 mb-1">
-          <span className="font-medium truncate">{product.brand?.name || "Tâm Store"}</span>
+          <span className="font-medium truncate">{product.brand?.name || "Nexus Gaming"}</span>
           <span className={isOutOfStock ? "text-red-500 font-medium" : "text-emerald-600 dark:text-emerald-400"}>
             {isOutOfStock ? "Hết hàng" : "Còn hàng"}
           </span>

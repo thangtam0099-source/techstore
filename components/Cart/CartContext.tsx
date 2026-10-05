@@ -28,8 +28,9 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = "tamstore_cart";
-const LEGACY_CART_STORAGE_KEY = "techstore_cart";
+const CART_STORAGE_KEY = "nexusgaming_cart";
+const LEGACY_CART_STORAGE_KEY = "tamstore_cart";
+const OLD_LEGACY_CART_STORAGE_KEY = "techstore_cart";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -39,7 +40,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(CART_STORAGE_KEY) || localStorage.getItem(LEGACY_CART_STORAGE_KEY);
+      const stored =
+        localStorage.getItem(CART_STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_CART_STORAGE_KEY) ||
+        localStorage.getItem(OLD_LEGACY_CART_STORAGE_KEY);
       if (stored) {
         setItems(JSON.parse(stored));
       }
